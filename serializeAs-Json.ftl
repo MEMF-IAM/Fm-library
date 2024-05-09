@@ -23,6 +23,8 @@ TODO::Add synopsis, version, author, function list and history here
 <#--
     inspired by
     https://gist.github.com/ruudud/698035f96e860ef85d3f?permalink_comment_id=3788741#gistcomment-3788741
+    and to lesser extent by
+    https://github.com/MajorLeagueBaseball/freemarker-json/blob/master/json.ftl
 -->
 
     <#local out = "" />
