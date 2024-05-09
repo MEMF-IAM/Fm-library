@@ -1,3 +1,7 @@
+<#--
+TODO::Add synopsis, version, author, function list and history here
+-->
+
 <#macro replicate source amount ><#--
     --><#list 0..<amount!0 as i><#--
         -->${source}<#--
@@ -130,8 +134,10 @@
 
 </#function>
 
+<#--
 <#assign mine = { "foo" : "bar", "class" : "should not be here", "guz" : 43 } />
 <#assign mine2 = { "single array" : [ "value" ], "simple" : "property" } />
 <#assign mine3 = { "single array" : [ "value" ], "simple" : "property", "hash" : { "array" : [ 42, 13, 77, -38 ], "subhash" : { "white" : true, "scalar": 42, "subsubhash" : { "simple" : "kai", "class" : "ignore me", "simple2" : "beach" } } } } />
 
 ${ serializeAs_Json( mine3 ) }
+-->
