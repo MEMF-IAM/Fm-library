@@ -196,8 +196,8 @@ TODO::Add synopsis, version, author, function list and history here
     <#attempt>
         <#local _is_type = ( object?is_hash ) />
     <#recover>
-        /* Unable to determine whether object is a hash */
-        <#return _out />
+        <#local _err >/* Unable to determine whether object is a hash */</#local>
+        <#return _err />
     </#attempt>
 
     <#if _is_type >
@@ -205,17 +205,17 @@ TODO::Add synopsis, version, author, function list and history here
         <#attempt>
             <#local _keys = object?keys?filter( name -> ! __Json_reserved_keys?seq_contains( name ) ) />
         <#recover>
-            /* Unable to enumerate hash keys */
-            <#return _out />
+            <#local _err >/* Unable to enumerate hash keys */</#local>
+            <#return _err />
         </#attempt>
 
-        <#assign _out >{<@cr/><#--
+        <#local _out >{<@cr/><#--
 
     --><#list _keys as _key ><#--
         --><#attempt>
                 <#local _value = object[_key] />
             <#recover>
-                /* Unable to acquire key ${_key} of object */
+                <#assign _out>Unable to acquire key ${_key} of object */</#local>
                 <#continue />
             </#attempt><#--
 
@@ -225,7 +225,7 @@ TODO::Add synopsis, version, author, function list and history here
     --></#list><#--
 
     --><@cr/><@replicate __Json_indentation level />}<#--
-    --></#assign>
+    --></#local>
 
         <#return _out />
 
@@ -234,13 +234,13 @@ TODO::Add synopsis, version, author, function list and history here
     <#attempt>
         <#local _is_type = object?is_enumerable />
     <#recover>
-        /* Unable to determine whether object is a sequence */
-        <#return _out />
+        <#local _err >/* Unable to determine whether object is a sequence */</#local>
+        <#return _err />
     </#attempt>
 
     <#if _is_type >
 
-        <#assign _out >[<@cr/><#--
+        <#local _out >[<@cr/><#--
 
     --><#list object as _value ><#--
         --><@replicate source = __Json_indentation amount = ( level + 1 ) /><#--
@@ -249,7 +249,7 @@ TODO::Add synopsis, version, author, function list and history here
     --></#list><#--
 
     --><@cr/><@replicate __Json_indentation level />]<#--
-    --></#assign>
+    --></#local>
 
         <#return _out />
 
@@ -258,15 +258,15 @@ TODO::Add synopsis, version, author, function list and history here
     <#attempt>
         <#local _is_type = ( object?is_number || object?is_boolean ) />
     <#recover>
-        /* Unable to determine whether object is a number */
-        <#return _out />
+        <#local _err >/* Unable to determine whether object is a number */</#local>
+        <#return _err />
     </#attempt>
 
     <#if _is_type >
 
-        <#assign _out >${object?c}<#--
+        <#local _out >${object?c}<#--
 
-    --></#assign>
+    --></#local>
 
         <#return _out />
 
@@ -275,25 +275,27 @@ TODO::Add synopsis, version, author, function list and history here
     <#attempt>
         <#local _is_type = object?is_method />
     <#recover>
-        /* Unable to determine whether object is a method */
-        <#return _out />
+        <#local _err >/* Unable to determine whether object is a method */</#local>
+        <#return _err />
     </#attempt>
 
     <#if _is_type >
 
-        <#assign _out ><method><#--
+        <#local _out >/* Methods are not supported */<#--
 
-    --></#assign>
+    --></#local>
 
         <#return _out />
 
     </#if>
 
     <#attempt>
-        <#assign _out >"${object}"</#assign>
+        <#local _out >"${object}"<#--
+        
+    --></#local>
     <#recover>
-        /* Unable to transform object to a string */
-        <#return _out />
+        <#local _err >/* Unable to transform object to a string */</#local>
+        <#return _err />
     </#attempt>
 
     <#return _out />
