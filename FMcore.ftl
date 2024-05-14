@@ -152,32 +152,32 @@ TODO::Add synopsis, version, author, function list and history here
         <#else>
             <#local _clone += { _key : _accu } />
         </#if>
+    </#list>
 
-        <#-- at end of list and value not added yet ? -->
-        <#if _key?is_last && ! _committed >
-            <#if _eop >
-                <#-- clone is sequence ? -->
-                <#if _clone?is_enumerable >
-                    <#-- add value as new entry -->
-                    <#local _clone += value />
-                <#-- clone is hash ? -->
-                <#elseif _clone?is_hash >
-                    <#-- add value as new entry -->
-                    <#local _clone += { _node : value } />
-                </#if>
-            <#else>
-                <#-- clone is sequence ? -->
-                <#if _clone?is_enumerable >
-                    <#-- add ( recurse [empty array] keys[1..] value overwrite ) to clone -->
-                    <#local _clone += addTo_collection( [] _path[1..] value overwrite ) />
-                <#-- clone is hash ? -->
-                <#elseif _clone?is_hash >
-                    <#-- add ( recurse [empty hash] keys[1..] value overwrite ) to clone -->
-                    <#local _clone += addTo_collection( {} _path[1..] value overwrite ) />
-                </#if>
+    <#-- at end of list and value not added yet ? -->
+    <#if ! _committed >
+        <#if _eop >
+            <#-- clone is sequence ? -->
+            <#if _clone?is_enumerable >
+                <#-- add value as new entry -->
+                <#local _clone += value />
+            <#-- clone is hash ? -->
+            <#elseif _clone?is_hash >
+                <#-- add value as new entry -->
+                <#local _clone += { _node : value } />
+            </#if>
+        <#else>
+            <#-- clone is sequence ? -->
+            <#if _clone?is_enumerable >
+                <#-- add ( recurse [empty array] keys[1..] value overwrite ) to clone -->
+                <#local _clone += addTo_collection( [] _path[1..] value overwrite ) />
+            <#-- clone is hash ? -->
+            <#elseif _clone?is_hash >
+                <#-- add ( recurse [empty hash] keys[1..] value overwrite ) to clone -->
+                <#local _clone += addTo_collection( {} _path[1..] value overwrite ) />
             </#if>
         </#if>
-    </#list>
+    </#if>
 
     <#return _clone />
 
