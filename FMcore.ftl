@@ -51,15 +51,6 @@ TODO::Add synopsis, version, author, function list and history here
     <#return _out />
 </#function>
 
-
-<#assign h = { "foo" : [ "bar", "guz" ], "kai" : { "yum" : "zol" } } />
-<#assign s = [ "foo", "bar", "guz", "kai" ] />
-<#assign n = 42.15 />
-<#assign b = false />
-<#assign t = "hello world" />
-${var_dump(h)}
--->
-
 <#function addTo_collection object index value overwrite = false >
 
 <#-- not ( object and index ) ? -> bail out -->
@@ -191,57 +182,6 @@ ${var_dump(h)}
 
 </#function>
 
-<#--
-<#assign mine = { "foo" : "bar", "class" : "should not be here", "guz" : { "kai" : 43 } } />
-<#assign mine >
-{
-        "results" : {
-            "start" : "2024-05-13T08:20:31Z",
-                "unlink" : {
-                "successful" : [
-                    "37838eb4-3ef6-4570-98df-75c03fffa37d",
-                    "13e9352d-edfc-46e4-8e2e-76d711a89655"
-                ],
-                    "summary" : "2 middelen ontkoppeld."
-                }
-                },
-                    "change" : {
-            "id" : "4dfa141a-4889-43c6-8f84-6bc9f3c71109",
-                "number" : "W2405 0046"
-            },
-                "person" : {
-            "id" : "8ed950f8-4cba-4d30-bee8-f9a2099f2d8f",
-                "name" : "Kikkert, Rudi"
-            },
-                "assets" : {
-            "types" : {
-                "count" : "1",
-                    "type" : {
-                    "F4D3D1C1-1EE7-4A77-B468-76D722FB27C1" : [
-                        "f382b414-cf91-4972-b758-cad88229eeb4"
-                    ]
-                    }
-                    },
-                        "link" : {
-                "a852865b-905a-4519-b29f-f79c9cd89ff0" : "FT0040",
-                    "f7396f30-a61c-4876-acdd-5701f73fb67a" : "FT0044"
-                },
-                    "unlink" : {
-                "37838eb4-3ef6-4570-98df-75c03fffa37d" : "FT0041",
-                    "13e9352d-edfc-46e4-8e2e-76d711a89655" : "FT0042"
-                }
-                }
-                }
-</#assign>
-<#assign mine = ( mine?eval_json )!{} />
-<#assign res = addTo_collection( mine, "kai", 99 ) />
-<#assign res = addTo_collection( mine, [ "guz", "kai" ], [ 99, 100 ] ) />
-<#assign res = addTo_collection( mine, [ "guz", "kai" ], { "new" : "hash" }, true ) />
-<#assign res = addTo_collection( res, [ "guz", "kai" ], { "newest" : "one" }, false ) />
-<#assign res = addTo_collection( res, "guz.yum", "additional", false ) />
-${var_dump( res["guz"] )}
--->
-
 <#function serializeAs_Json object = {} level = 0 >
 
 <#--
@@ -359,11 +299,3 @@ ${var_dump( res["guz"] )}
     <#return _out />
 
 </#function>
-
-<#--
-<#assign mine = { "foo" : "bar", "class" : "should not be here", "guz" : 43 } />
-<#assign mine2 = { "single array" : [ "value" ], "simple" : "property" } />
-<#assign mine3 = { "single array" : [ "value" ], "simple" : "property", "hash" : { "array" : [ 42, 13, 77, -38 ], "subhash" : { "white" : true, "scalar": 42, "subsubhash" : { "simple" : "kai", "class" : "ignore me", "simple2" : "beach" } } } } />
-
-${ serializeAs_Json( mine3 ) }
--->
