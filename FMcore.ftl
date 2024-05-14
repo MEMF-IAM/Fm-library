@@ -215,7 +215,7 @@ TODO::Add synopsis, version, author, function list and history here
         --><#attempt>
                 <#local _value = object[_key] />
             <#recover>
-                <#assign _out>Unable to acquire key ${_key} of object */</#local>
+                <#local _out>Unable to acquire key ${_key} of object */</#local>
                 <#continue />
             </#attempt><#--
 
