@@ -53,125 +53,126 @@ TODO::Add synopsis, version, author, function list and history here
 
 <#function addTo_collection object index value overwrite = false >
 
-<#-- not ( object and index ) ? -> bail out -->
+    <#-- not ( object and index ) ? -> bail out -->
     <#if ! ( object?? && index?? ) >
         <#return undefined />
     </#if>
 
-<#--assign workobject -->
+    <#-- assign workobject -->
     <#local _object = object >
 
-<#-- index is a sequence ? -->
+    <#-- index is a sequence ? -->
     <#if ! index?is_enumerable >
-<#--    assign workpath by splitting index on dot -->
+        <#-- assign workpath by splitting index on dot -->
         <#local _path = index?trim?split(".") />
     <#else>
-<#--    assign workpath -->
+        <#-- assign workpath -->
         <#local _path = index />
     </#if>
 
-<#--get first node -->
+    <#-- get first node -->
     <#local _node = _path?first />
-<#--determine eop -->
+    <#-- determine eop -->
     <#local _eop = _path?size == 1 />
 
-<#--workobject is not a hash or sequence ? -->
+    <#-- workobject is not a hash or sequence ? -->
     <#if ! ( _object?is_hash || _object?is_enumerable ) >
-<#--    single value, turn into sequence -->
+        <#-- single value, turn into sequence -->
         <#local _object = [ object ] />
     </#if>
 
-<#--workobject is a hash ? -->
+    <#-- workobject is a hash ? -->
     <#if _object?is_hash >
-<#--    get keys -->
+        <#-- get keys -->
         <#local _keys = ( _object?keys?filter( name -> ! __Json_reserved_keys?seq_contains( name ) ) )![] />
-<#--    assign accu empty hash -->
+        <#-- assign accu empty hash -->
         <#local _clone = {} />
+    <#-- workobject is a seqence ? -->
     <#elseif _object?is_enumerable >
-<#--workobject is a seqence ? -->
-<#--    get keys = 0..(workobject?size!1 - 1) -->
+        <#-- get keys = 0..(workobject?size!1 - 1) -->
         <#local _keys = [ 0 .. ( _object?size!1 - 1 ) ] />
-<#--    assign accu empty sequence -->
+        <#-- assign accu empty sequence -->
         <#local _clone = [] />
+    <#-- workobject is not a hash or sequence ? -->
     <#else>
-<#--    workobject is not a hash or sequence, other types currently unsupported -->
+        <#-- bail out, other types currently unsupported -->
         <#return undefined />
     </#if>
 
-<#--assign commited false -->
+    <#-- assign commited false -->
     <#local _committed = false />
 
-<#--loop keys -->
+    <#-- loop keys -->
     <#list _keys as _key >
-<#--    get object[key]'s value -->
+        <#-- get object[key]'s value -->
         <#attempt>
             <#local _accu = _object[_key] />
         <#recover>
             <#continue />
         </#attempt>
 
-<#--    key equals node ? -->
+        <#-- key equals node ? -->
         <#if _node == _key >
-<#--        are we at end of path ? -->
+            <#-- are we at end of path ? -->
             <#if _eop >
-<#-- should we assert here that given value *can* be added to object[_key]'s value, i.e. of the same type?
-    at least, if the current value is a scalar, it should become a sequence
-    and if the current value is a hash, the value added must be a hash tuple
--->
-<#--            overwrite ? -->
+                <#-- should we assert here that given value *can* be added to object[_key]'s value, i.e. of the same type?
+                    at least, if the current value is a scalar, it should become a sequence
+                    and if the current value is a hash, the value added must be a hash tuple
+                -->
+                <#-- overwrite ? -->
                 <#if overwrite >
-<#--                add value to accu -->
+                    <#-- add value to accu -->
                     <#local _accu = value />
-<#--            append ? -->
+                <#-- append ? -->
                 <#else>
-<#--                workobject not a hash or sequence ? -->
+                    <#-- workobject not a hash or sequence ? -->
                     <#if ! ( _accu?is_enumerable || _accu?is_hash ) >
-<#--                    single value, turn into sequence as cannot 'invent' as hash key -->
+                        <#-- single value, turn into sequence as cannot 'invent' as hash key -->
                         <#local _accu = [ _accu ] />
                     </#if>
-<#--                add workobject[key] + value to accu -->
+                    <#-- add workobject[key] + value to accu -->
                     <#attempt>
                         <#local _accu += value />
                     <#recover>
                         <#continue />
                     </#attempt>
                 </#if>
-<#--        are we not at end of path ? -->
+            <#-- are we not at end of path ? -->
             <#else>
-<#--            add ( recurse workobject[key] keys[1..] value overwrite ) to accu -->
+                <#-- add ( recurse workobject[key] keys[1..] value overwrite ) to accu -->
                 <#local _accu = addTo_collection( _accu _path[1..] value overwrite ) />
             </#if>
-<#--        mark value as processed -->
+            <#-- mark value as processed -->
             <#local _committed = true />
         </#if>
 
-<#--    add computed value to clone -->
+        <#-- add computed value to clone -->
         <#if _clone?is_enumerable >
             <#local _clone += _accu />
         <#else>
             <#local _clone += { _key : _accu } />
         </#if>
 
-<#--    at end of list and value not added yet ? -->
+        <#-- at end of list and value not added yet ? -->
         <#if _key?is_last && ! _committed >
             <#if _eop >
-<#--            clone is sequence ? -->
+                <#-- clone is sequence ? -->
                 <#if _clone?is_enumerable >
-<#--                add value as new entry -->
+                    <#-- add value as new entry -->
                     <#local _clone += value />
-<#--            clone is hash ? -->
+                <#-- clone is hash ? -->
                 <#elseif _clone?is_hash >
-<#--                add value as new entry -->
+                    <#-- add value as new entry -->
                     <#local _clone += { _node : value } />
                 </#if>
             <#else>
-<#--            clone is sequence ? -->
+                <#-- clone is sequence ? -->
                 <#if _clone?is_enumerable >
-<#--                add ( recurse [empty array] keys[1..] value overwrite ) to clone -->
+                    <#-- add ( recurse [empty array] keys[1..] value overwrite ) to clone -->
                     <#local _clone += addTo_collection( [] _path[1..] value overwrite ) />
-<#--            clone is hash ? -->
+                <#-- clone is hash ? -->
                 <#elseif _clone?is_hash >
-<#--                add ( recurse [empty hash] keys[1..] value overwrite ) to clone -->
+                    <#-- add ( recurse [empty hash] keys[1..] value overwrite ) to clone -->
                     <#local _clone += addTo_collection( {} _path[1..] value overwrite ) />
                 </#if>
             </#if>
