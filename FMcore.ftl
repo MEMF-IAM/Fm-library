@@ -127,12 +127,16 @@ TODO::Add synopsis, version, author, function list and history here
                 <#else>
                     <#-- workobject not a hash or sequence ? -->
                     <#if ! ( _accu?is_enumerable || _accu?is_hash ) >
-                        <#-- single value, turn into sequence as cannot 'invent' as hash key -->
+                        <#-- single value, turn into sequence because cannot 'invent' a hash key -->
                         <#local _accu = [ _accu ] />
                     </#if>
                     <#-- add workobject[key] + value to accu -->
                     <#attempt>
-                        <#local _accu += value />
+                        <#if _accu?is_enumerable >
+                            <#local _accu += [ value ] />
+                        <#else>
+                            <#local _accu += value />
+                        </#if>
                     <#recover>
                         <#continue />
                     </#attempt>
