@@ -2,6 +2,12 @@
 TODO::Add synopsis, version, author, function list and history here
 -->
 
+<#assign __Json_reserved_keys = [
+    "class"
+] />
+
+<#assign __Json_indentation = "    " />
+
 <#macro replicate source amount ><#--
     --><#list 0..<amount!0 as i><#--
         -->${source}<#--
@@ -12,12 +18,6 @@ TODO::Add synopsis, version, author, function list and history here
     -->${'\n'}<#--
 --></#macro>
 
-<#assign __Json_reserved_keys = [
-    "class"
-] />
-
-<#assign __Json_indentation = "    " />
-
 <#function serializeAs_Json object = {} level = 0 >
 
 <#--
@@ -27,13 +27,13 @@ TODO::Add synopsis, version, author, function list and history here
     https://github.com/MajorLeagueBaseball/freemarker-json/blob/master/json.ftl
 -->
 
-    <#local out = "" />
+    <#local _out = "" />
 
     <#attempt>
-        <#local _is_type = ( object?is_hash || object?is_hash_ex ) />
+        <#local _is_type = ( object?is_hash ) />
     <#recover>
         /* Unable to determine whether object is a hash */
-        <#return _out>
+        <#return _out />
     </#attempt>
 
     <#if _is_type >
@@ -42,7 +42,7 @@ TODO::Add synopsis, version, author, function list and history here
             <#local _keys = object?keys?filter( name -> ! __Json_reserved_keys?seq_contains( name ) ) />
         <#recover>
             /* Unable to enumerate hash keys */
-            <#return _out>
+            <#return _out />
         </#attempt>
 
         <#assign _out >{<@cr/><#--
@@ -52,7 +52,7 @@ TODO::Add synopsis, version, author, function list and history here
                 <#local _value = object[_key] />
             <#recover>
                 /* Unable to acquire key ${_key} of object */
-                <#continue>
+                <#continue />
             </#attempt><#--
 
         --><@replicate source = __Json_indentation amount = ( level + 1 ) /><#--
@@ -71,7 +71,7 @@ TODO::Add synopsis, version, author, function list and history here
         <#local _is_type = object?is_enumerable />
     <#recover>
         /* Unable to determine whether object is a sequence */
-        <#return _out>
+        <#return _out />
     </#attempt>
 
     <#if _is_type >
@@ -95,7 +95,7 @@ TODO::Add synopsis, version, author, function list and history here
         <#local _is_type = ( object?is_number || object?is_boolean ) />
     <#recover>
         /* Unable to determine whether object is a number */
-        <#return _out>
+        <#return _out />
     </#attempt>
 
     <#if _is_type >
@@ -112,7 +112,7 @@ TODO::Add synopsis, version, author, function list and history here
         <#local _is_type = object?is_method />
     <#recover>
         /* Unable to determine whether object is a method */
-        <#return _out>
+        <#return _out />
     </#attempt>
 
     <#if _is_type >
