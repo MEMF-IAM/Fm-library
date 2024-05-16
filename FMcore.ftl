@@ -18,6 +18,10 @@ TODO::Add synopsis, version, author, function list and history here
     -->${'\n'}<#--
 --></#macro>
 
+<#macro comment what type = "json" ><#--
+    --><#if type?lower_case == "json" >/* ${what?trim} */</#if><#--
+--></#macro>
+
 <#function var_dump var depth = 0 >
     <#local _out = ""?default />
     <#if var?is_sequence>
