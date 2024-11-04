@@ -22,13 +22,13 @@ TODO::Add synopsis, version, author, function list and history here
 
 --><#compress>
 
-    <#local _what = what?trim />
+    <#local _entry = what?trim />
 
     <#switch type?lower_case >
-        <#case "json">/* ${ _what } */<#break />
-        <#case "html"><#noparse><!-- </#noparse>${ _what }<#noparse> --></#noparse><#break />
+        <#case "json">/* ${ _entry } */<#break />
+        <#case "html"><#noparse><!-- </#noparse>${ _entry }<#noparse> --></#noparse><#break />
         <#case "raw"><#-- fallin' thru -->
-        <#default>${ _what }
+        <#default>${ _entry }
     </#switch>
 
     </#compress><#--
@@ -42,8 +42,20 @@ TODO::Add synopsis, version, author, function list and history here
     <#if ! .globals.__journal?? >
         <#global __journal = [] />
     </#if>
+    <#if ! .globals.__journal?is_sequence >
+        <#global __journal = [] />
+    </#if>
 
-    <#global __journal += [ what?trim ] />
+    <#local _entry = what!"" />
+
+    <#switch type?lower_case >
+        <#case "json"><#local _entry = _entry?json_string /><#break />
+        <#case "html"><#local _entry = _entry?html        /><#break />
+        <#case "raw">                                       <#-- fallin' thru -->
+        <#default>    <#local _entry = _entry?cn          />
+    </#switch>
+
+    <#global __journal += [ _entry ] />
 
     <#if comment!false >
 
