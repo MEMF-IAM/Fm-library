@@ -39,14 +39,20 @@ TODO::Add synopsis, version, author, function list and history here
 
 --><#compress>
 
+    <#if ( what?is_sequence )!false >
+        <#list what![] as _entry >
+            <@addTo_journal what = _entry comment = comment type = type />
+        </#list>
+        <#return />
+    </#if>
+
     <#if ! .globals.__journal?? >
         <#global __journal = [] />
-    </#if>
-    <#if ! .globals.__journal?is_sequence >
+    <#elseif ! .globals.__journal?is_sequence >
         <#global __journal = [] />
     </#if>
 
-    <#local _entry = what!"" />
+    <#local _entry = .now?iso_utc_ms + "::" + what?string />
 
     <#switch type?lower_case >
         <#case "json"><#local _entry = _entry?json_string /><#break />
