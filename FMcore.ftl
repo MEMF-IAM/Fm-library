@@ -18,8 +18,41 @@ TODO::Add synopsis, version, author, function list and history here
     -->${'\n'}<#--
 --></#macro>
 
-<#macro comment what type = "json" ><#--
-    --><#if type?lower_case == "json" >/* ${what?trim} */</#if><#--
+<#macro write_comment what type = "json" ><#--
+
+--><#compress>
+
+    <#local _what = what?trim />
+
+    <#switch type?lower_case >
+        <#case "json">/* ${ _what } */<#break />
+        <#case "html"><#noparse><!-- </#noparse>${ _what }<#noparse> --></#noparse><#break />
+        <#case "raw"><#-- fallin' thru -->
+        <#default>${ _what }
+    </#switch>
+
+    </#compress><#--
+
+--></#macro>
+
+<#macro addTo_journal what comment = false type = "json" ><#--
+
+--><#compress>
+
+    <#if ! .globals.__journal?? >
+        <#global __journal = [] />
+    </#if>
+
+    <#global __journal += [ what?trim ] />
+
+    <#if comment!false >
+
+        <@write_comment what = what type = type />
+
+    </#if>
+
+    </#compress><#--
+    
 --></#macro>
 
 <#function var_dump var depth = 0 >
