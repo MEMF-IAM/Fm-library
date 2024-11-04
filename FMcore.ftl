@@ -181,10 +181,17 @@ TODO::Add synopsis, version, author, function list and history here
                     </#if>
                     <#-- add workobject[key] + value to accu -->
                     <#attempt>
-                        <#if _accu?is_enumerable >
+                        <#-- value and accu are both either sequence or hash ? -->
+                        <#if ( _accu?is_sequence && value?is_sequence ) || ( _accu?is_hash && value?is_hash ) >
+                            <#-- add the value as is, and let operator perform built-in appending -->
+                            <#local _accu += value >
+                        <#-- accu is a sequence but value is something else ? -->
+                        <#elseif _accu?is_sequence >
+                            <#-- add value as another item to accu -->
                             <#local _accu += [ value ] />
-                        <#else>
-                            <#local _accu += value />
+                        <#elseif _accu?is_hash >
+                            <#-- add value as an anonymous tuple to accu -->
+                            <#local _accu += { ( _accu?keys?size++ )?string["key000"] : value } />
                         </#if>
                     <#recover>
                         <#continue />
