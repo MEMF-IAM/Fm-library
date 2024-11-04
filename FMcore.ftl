@@ -191,7 +191,7 @@ TODO::Add synopsis, version, author, function list and history here
                             <#local _accu += [ value ] />
                         <#elseif _accu?is_hash >
                             <#-- add value as an anonymous tuple to accu -->
-                            <#local _accu += { ( _accu?keys?size++ )?string["key000"] : value } />
+                            <#local _accu += { ( _accu?keys?size!0 + 1 )?string["key000"] : value } />
                         </#if>
                     <#recover>
                         <#continue />
