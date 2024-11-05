@@ -73,35 +73,60 @@ TODO::Add synopsis, version, author, function list and history here
     
 --></#macro>
 
-<#function var_dump var depth = 0 >
+<#function var_dump var chain = false delimiter = " " depth = 0 >
     <#local _out = ""?default />
     <#if var?is_sequence>
-        <#local _out>
-            <#list var as _value>
-                <@replicate source = __Json_indentation amount = ( depth ) /><#--
-                -->item ${_value?index}:<@cr/><#--
-                -->${var_dump( _value, ( depth + 1 ) )}
-            </#list>
-        </#local>
+        <#local _out><#--
+            --><#if chain><@compress single_line = true />@( </#if><#--
+            --><#list var as _value><#--
+                --><#if chain ><#--
+                    -->[${var_dump( _value, chain, delimiter, ( depth + 1 ) )}]<#if ! _value?is_last >${delimiter}</#if><#--
+                --><#else><#--
+                    --><@replicate source = __Json_indentation amount = ( depth ) /><#--
+                    -->item ${_value?index}:<@cr/><#--
+                    -->${var_dump( _value, chain, delimiter, ( depth + 1 ) )}
+                </#if>
+            </#list><#--
+            --><#if chain> )</#if><#--
+        --></#local>
     <#elseif var?is_hash >
-        <#local _out>
-            <#list var as _index, _value>
-                <@replicate source = __Json_indentation amount = ( depth ) /><#--
-                -->key  ${_index}:<@cr/><#--
-                -->${var_dump( _value, ( depth + 1 ) )}
-            </#list>
-        </#local>
+        <#local _out><#--
+            --><#if chain><@compress single_line = true />@{ </#if><#--
+            --><#list var as _index, _value><#--
+                --><#if chain ><#--
+                    -->${_index} = [${var_dump( _value, chain, delimiter, ( depth + 1 ) )}]<#if ! _index?is_last >${delimiter}</#if><#--
+                --><#else><#--
+                    --><@replicate source = __Json_indentation amount = ( depth ) /><#--
+                    -->key  ${_index}:<@cr/><#--
+                    -->${var_dump( _value, chain, delimiter, ( depth + 1 ) )}
+                </#if>
+            </#list><#--
+            --><#if chain> }</#if><#--
+        --></#local>
     <#elseif var?is_string >
-        <#local _out >strg : ${var}</#local>
+        <#local _out = var?string />
+        <#if ! chain>
+            <#local _out = "strg : ${_out}" />
+        </#if>
     <#elseif var?is_number >
-        <#local _out >nmbr : ${var?string}</#local>
+        <#local _out = var?string />
+        <#if ! chain>
+            <#local _out = "nmbr : ${_out}" />
+        </#if>
     <#elseif var?is_boolean >
-        <#local _out >bool : ${var?string("true","false")}</#local>
+        <#local _out = var?string("true","false") />
+        <#if ! chain>
+            <#local _out = "bool : ${_out}" />
+        </#if>
     </#if>
     <#local _out ><#--
-        --><@replicate source = __Json_indentation amount = ( depth ) /><#--
-        -->${_out}<#--
-        --><@cr/><#--
+        --><#if chain ><#--
+            -->${_out}<#--
+        --><#else><#--
+            --><@replicate source = __Json_indentation amount = ( depth ) /><#--
+            -->${_out}<#--
+            --><@cr/><#--
+        --></#if><#--
     --></#local>
     <#return _out />
 </#function>
