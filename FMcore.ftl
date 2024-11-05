@@ -18,39 +18,115 @@ TODO::Add synopsis, version, author, function list and history here
     -->${'\n'}<#--
 --></#macro>
 
-<#macro comment what type = "json" ><#--
-    --><#if type?lower_case == "json" >/* ${what?trim} */</#if><#--
+<#macro write_comment what type = "json" ><#--
+
+--><#compress>
+
+    <#local _entry = what?trim />
+
+    <#switch type?lower_case >
+        <#case "json">/* ${ _entry } */<#break />
+        <#case "html"><#noparse><!-- </#noparse>${ _entry }<#noparse> --></#noparse><#break />
+        <#case "raw"><#-- fallin' thru -->
+        <#default>${ _entry }
+    </#switch>
+
+    </#compress><#--
+
 --></#macro>
 
-<#function var_dump var depth = 0 >
+<#macro addTo_journal what comment = false type = "json" ><#--
+
+--><#compress>
+
+    <#if ( what?is_sequence )!false >
+        <#list what![] as _entry >
+            <@addTo_journal what = _entry comment = comment type = type />
+        </#list>
+        <#return />
+    </#if>
+
+    <#if ! .globals.__journal?? >
+        <#global __journal = [] />
+    <#elseif ! .globals.__journal?is_sequence >
+        <#global __journal = [] />
+    </#if>
+
+    <#local _entry = .now?iso_utc_ms + "::" + what?string />
+
+    <#switch type?lower_case >
+        <#case "json"><#local _entry = _entry?json_string /><#break />
+        <#case "html"><#local _entry = _entry?html        /><#break />
+        <#case "raw">                                       <#-- fallin' thru -->
+        <#default>    <#local _entry = _entry?cn          />
+    </#switch>
+
+    <#global __journal += [ _entry ] />
+
+    <#if comment!false >
+
+        <@write_comment what = what type = type />
+
+    </#if>
+
+    </#compress><#--
+    
+--></#macro>
+
+<#function var_dump var chain = false delimiter = " " depth = 0 >
     <#local _out = ""?default />
     <#if var?is_sequence>
-        <#local _out>
-            <#list var as _value>
-                <@replicate source = __Json_indentation amount = ( depth ) /><#--
-                -->item ${_value?index}:<@cr/><#--
-                -->${var_dump( _value, ( depth + 1 ) )}
-            </#list>
-        </#local>
+        <#local _out><#--
+            --><#if chain><@compress single_line = true />@( </#if><#--
+            --><#list var as _value><#--
+                --><#if chain ><#--
+                    -->[${var_dump( _value, chain, delimiter, ( depth + 1 ) )}]<#if ! _value?is_last >${delimiter}</#if><#--
+                --><#else><#--
+                    --><@replicate source = __Json_indentation amount = ( depth ) /><#--
+                    -->item ${_value?index}:<@cr/><#--
+                    -->${var_dump( _value, chain, delimiter, ( depth + 1 ) )}
+                </#if>
+            </#list><#--
+            --><#if chain> )</#if><#--
+        --></#local>
     <#elseif var?is_hash >
-        <#local _out>
-            <#list var as _index, _value>
-                <@replicate source = __Json_indentation amount = ( depth ) /><#--
-                -->key  ${_index}:<@cr/><#--
-                -->${var_dump( _value, ( depth + 1 ) )}
-            </#list>
-        </#local>
+        <#local _out><#--
+            --><#if chain><@compress single_line = true />@{ </#if><#--
+            --><#list var as _index, _value><#--
+                --><#if chain ><#--
+                    -->${_index} = [${var_dump( _value, chain, delimiter, ( depth + 1 ) )}]<#if ! _index?is_last >${delimiter}</#if><#--
+                --><#else><#--
+                    --><@replicate source = __Json_indentation amount = ( depth ) /><#--
+                    -->key  ${_index}:<@cr/><#--
+                    -->${var_dump( _value, chain, delimiter, ( depth + 1 ) )}
+                </#if>
+            </#list><#--
+            --><#if chain> }</#if><#--
+        --></#local>
     <#elseif var?is_string >
-        <#local _out >strg : ${var}</#local>
+        <#local _out = var?string />
+        <#if ! chain>
+            <#local _out = "strg : ${_out}" />
+        </#if>
     <#elseif var?is_number >
-        <#local _out >nmbr : ${var?string}</#local>
+        <#local _out = var?string />
+        <#if ! chain>
+            <#local _out = "nmbr : ${_out}" />
+        </#if>
     <#elseif var?is_boolean >
-        <#local _out >bool : ${var?string("true","false")}</#local>
+        <#local _out = var?string("true","false") />
+        <#if ! chain>
+            <#local _out = "bool : ${_out}" />
+        </#if>
     </#if>
     <#local _out ><#--
-        --><@replicate source = __Json_indentation amount = ( depth ) /><#--
-        -->${_out}<#--
-        --><@cr/><#--
+        --><#if chain ><#--
+            -->${_out}<#--
+        --><#else><#--
+            --><@replicate source = __Json_indentation amount = ( depth ) /><#--
+            -->${_out}<#--
+            --><@cr/><#--
+        --></#if><#--
     --></#local>
     <#return _out />
 </#function>
@@ -136,10 +212,17 @@ TODO::Add synopsis, version, author, function list and history here
                     </#if>
                     <#-- add workobject[key] + value to accu -->
                     <#attempt>
-                        <#if _accu?is_enumerable >
+                        <#-- value and accu are both either sequence or hash ? -->
+                        <#if ( _accu?is_sequence && value?is_sequence ) || ( _accu?is_hash && value?is_hash ) >
+                            <#-- add the value as is, and let operator perform built-in appending -->
+                            <#local _accu += value >
+                        <#-- accu is a sequence but value is something else ? -->
+                        <#elseif _accu?is_sequence >
+                            <#-- add value as another item to accu -->
                             <#local _accu += [ value ] />
-                        <#else>
-                            <#local _accu += value />
+                        <#elseif _accu?is_hash >
+                            <#-- add value as an anonymous tuple to accu -->
+                            <#local _accu += { ( _accu?keys?size!0 + 1 )?string["key000"] : value } />
                         </#if>
                     <#recover>
                         <#continue />
@@ -148,7 +231,7 @@ TODO::Add synopsis, version, author, function list and history here
             <#-- are we not at end of path ? -->
             <#else>
                 <#-- add ( recurse workobject[key] keys[1..] value overwrite ) to accu -->
-                <#local _accu = addTo_collection( _accu _path[1..] value overwrite ) />
+                <#local _accu = addTo_collection( _accu, _path[1..], value, overwrite ) />
             </#if>
             <#-- mark value as processed -->
             <#local _committed = true />
@@ -178,11 +261,11 @@ TODO::Add synopsis, version, author, function list and history here
             <#-- clone is sequence ? -->
             <#if _clone?is_enumerable >
                 <#-- add ( recurse [empty array] keys[1..] value overwrite ) to clone -->
-                <#local _clone += addTo_collection( [] _path[1..] value overwrite ) />
+                <#local _clone += addTo_collection( [], _path[1..], value, overwrite ) />
             <#-- clone is hash ? -->
             <#elseif _clone?is_hash >
                 <#-- add ( recurse [empty hash] keys[1..] value overwrite ) to clone -->
-                <#local _clone += addTo_collection( {} _path[1..] value overwrite ) />
+                <#local _clone += addTo_collection( {}, _path[1..], value, overwrite ) />
             </#if>
         </#if>
     </#if>
