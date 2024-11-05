@@ -231,7 +231,7 @@ TODO::Add synopsis, version, author, function list and history here
             <#-- are we not at end of path ? -->
             <#else>
                 <#-- add ( recurse workobject[key] keys[1..] value overwrite ) to accu -->
-                <#local _accu = addTo_collection( _accu _path[1..] value overwrite ) />
+                <#local _accu = addTo_collection( _accu, _path[1..], value, overwrite ) />
             </#if>
             <#-- mark value as processed -->
             <#local _committed = true />
@@ -261,11 +261,11 @@ TODO::Add synopsis, version, author, function list and history here
             <#-- clone is sequence ? -->
             <#if _clone?is_enumerable >
                 <#-- add ( recurse [empty array] keys[1..] value overwrite ) to clone -->
-                <#local _clone += addTo_collection( [] _path[1..] value overwrite ) />
+                <#local _clone += addTo_collection( [], _path[1..], value, overwrite ) />
             <#-- clone is hash ? -->
             <#elseif _clone?is_hash >
                 <#-- add ( recurse [empty hash] keys[1..] value overwrite ) to clone -->
-                <#local _clone += addTo_collection( {} _path[1..] value overwrite ) />
+                <#local _clone += addTo_collection( {}, _path[1..], value, overwrite ) />
             </#if>
         </#if>
     </#if>
